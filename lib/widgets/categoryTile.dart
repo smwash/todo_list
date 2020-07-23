@@ -18,6 +18,14 @@ class CategoryTile extends StatelessWidget {
   final Category categoryData;
   final Todos tasks;
 
+  String taskNumber(int number) {
+    if (number < 2) {
+      return 'task';
+    } else {
+      return 'tasks';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -27,7 +35,7 @@ class CategoryTile extends StatelessWidget {
             category.updatefavoriteCategory(categoryData);
           }),
       title: Text(
-        categoryData.category,
+        '${categoryData.category},  (${category.taskCount} ${taskNumber(category.taskCount)}) ',
         style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
       ),
       subtitle: Text(tasks.todo == null ? 'No tasks added yet' : tasks.todo),

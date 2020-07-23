@@ -42,16 +42,15 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: kPrimaryColor.withOpacity(0.9),
-        label: Text('Add Task'),
+        label: Text('Create Task'),
         icon: Icon(Icons.add),
         onPressed: () {
-          showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              enableDrag: true,
-              builder: (context) {
-                return AddTaskScreen();
-              });
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddTaskScreen(),
+            ),
+          );
         },
       ),
     );

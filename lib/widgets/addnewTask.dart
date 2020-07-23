@@ -4,30 +4,19 @@ import 'package:my_todo_list/constants.dart';
 import 'package:my_todo_list/model/provider/task_data.dart';
 import 'package:provider/provider.dart';
 
-class AddTaskScreen extends StatefulWidget {
+class AddNewTaskScreen extends StatefulWidget {
   @override
-  _AddTaskScreenState createState() => _AddTaskScreenState();
+  _AddNewTaskScreenState createState() => _AddNewTaskScreenState();
 }
 
-class _AddTaskScreenState extends State<AddTaskScreen> {
+class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   String newTaskTitle;
-  String categoryTitle;
   DateTimeRange _startDate;
-  //DateTime endDate;
+  final _formKey = GlobalKey<FormState>();
 
-  // void pickStartDate() async {
-  //   final startDate = await showDatePicker(
-  //     context: context,
-  //     initialDate: DateTime.now(),
-  //     firstDate: DateTime(2019),
-  //     lastDate: DateTime.now(),
-  //   );
-  //   setState(() {
-  //     _startDate = startDate;
-  //   });
+  // void _trySubmit() {
+
   // }
-
-  // void addTextField() {}
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +36,6 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
       body: Container(
         padding: EdgeInsets.symmetric(
             horizontal: size.width * 0.06, vertical: size.height * 0.03),
-        //margin: EdgeInsets.only(top: size.height * 0.1),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(
@@ -55,6 +43,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
         child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -72,19 +61,19 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   ),
                 ),
                 TextFormField(
+                  validator: (value) {
+                    if (value.isEmpty || value.length < 2) {
+                      return 'Please Enter avalid task name';
+                    }
+                    return null;
+                  },
                   enableSuggestions: true,
                   autocorrect: true,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: kTextFieldDecoration.copyWith(
                     hintText: 'Enter task name..',
                   ),
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a task';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
+                  onSaved: (value) {
                     newTaskTitle = value;
                   },
                 ),
@@ -204,85 +193,63 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 SizedBox(
                   height: size.height * 0.02,
                 ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Text(
-                    'Enter Task Category: ',
-                    style: TextStyle(
-                      fontSize: size.height * 0.023,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 25.0),
-                  child: TextFormField(
-                    maxLength: 20,
-                    enableSuggestions: true,
-                    autocorrect: true,
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      hintText: 'Eg. personal, work, study, shopping',
-                    ),
-                    onChanged: (value) {
-                      categoryTitle = value;
-                    },
-                  ),
-                ),
                 Builder(
                   builder: (BuildContext context) {
                     return RaisedButton(
-                      child: Text(
-                        'Add Task',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      elevation: 0.0,
-                      color: kPrimaryColor.withOpacity(0.8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      onPressed: () {
-                        final data =
-                            Provider.of<TaskData>(context, listen: false);
-                        data.addTask(newTaskTitle);
-                        data.addCategory(categoryTitle);
+                        child: Text(
+                          'Add Task',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        elevation: 0.0,
+                        color: kPrimaryColor.withOpacity(0.8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        onPressed: () {
+                          FocusScope.of(context).unfocus();
+                          final isValid = _formKey.currentState.validate();
+                          if (isValid) {
+                            _formKey.currentState.save();
+                            Provider.of<TaskData>(context, listen: false)
+                                .addTask(newTaskTitle);
 
-                        // if (newTaskTitle.isEmpty && categoryTitle.isEmpty) {
-                        //   final snackBar = SnackBar(
-                        //     content: RichText(
-                        //       text: TextSpan(
-                        //         children: [
-                        //           TextSpan(
-                        //             text:
-                        //                 'Ummm...seems the text enterd can\`nt be',
-                        //             style: TextStyle(
-                        //                 fontSize: size.width * 0.05,
-                        //                 color: Colors.black87,
-                        //                 fontWeight: FontWeight.w600),
-                        //           ),
-                        //           TextSpan(
-                        //             text: 'checked',
-                        //             style: TextStyle(
-                        //               fontSize: size.width * 0.05,
-                        //               color: Colors.black87,
-                        //               fontWeight: FontWeight.w600,
-                        //               decoration: TextDecoration.lineThrough,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //     backgroundColor: kPrimaryColor.withOpacity(0.8),
-                        //   );
-                        //   Scaffold.of(context).showSnackBar(snackBar);
-                        // }
-
-                        // else {
-                        //   return null;
-                        // }
-                        Navigator.pop(context);
-                      },
-                    );
+                            Navigator.pop(context);
+                          }
+                          if (newTaskTitle == null) {
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(
+                                content: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text:
+                                            'Ummm...seems the task can\`nt be  ',
+                                        style: TextStyle(
+                                            fontSize: size.width * 0.04,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                      TextSpan(
+                                        text: 'checked',
+                                        style: TextStyle(
+                                          fontSize: size.width * 0.05,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          decoration:
+                                              TextDecoration.lineThrough,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                backgroundColor: kPrimaryColor,
+                                behavior: SnackBarBehavior.floating,
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                            return;
+                          }
+                        });
                   },
                 ),
               ],

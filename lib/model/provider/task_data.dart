@@ -1,11 +1,24 @@
 import 'dart:collection';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:my_todo_list/model/addtextFields.dart';
 import 'package:my_todo_list/model/categorydata.dart';
 import 'package:my_todo_list/model/todo_data.dart';
+
+class MyDateRange {
+  DateTimeRange pickedRangedate;
+  MyDateRange({this.pickedRangedate});
+}
 
 class TaskData with ChangeNotifier {
   List<Todos> _tasks = [];
   List<Category> _categories = [];
+  List<Textfields> _textFields = [];
+  DateTimeRange _dateTimeRange;
+
+  DateTimeRange get dateRange {
+    return _dateTimeRange;
+  }
 
   UnmodifiableListView<Todos> get tasks {
     return UnmodifiableListView(_tasks);
@@ -15,13 +28,10 @@ class TaskData with ChangeNotifier {
     return UnmodifiableListView(_categories);
   }
 
-  // Start of categories
-
-  void addTask(String newTask) {
-    final task = Todos(todo: newTask);
-    _tasks.add(task);
-    notifyListeners();
+  UnmodifiableListView<Textfields> get textFields {
+    return UnmodifiableListView(_textFields);
   }
+  // Start of categories
 
   void addCategory(String newCategory) {
     final category = Category(category: newCategory);
@@ -45,7 +55,14 @@ class TaskData with ChangeNotifier {
 
   // End of categories
 
-  // Start of tasks
+  // Start of  Tasks
+
+  void addTask(String newTask) {
+    final task = Todos(todo: newTask);
+    _tasks.add(task);
+    notifyListeners();
+  }
+
   int get taskCount {
     return _tasks.length;
   }
@@ -55,10 +72,52 @@ class TaskData with ChangeNotifier {
     notifyListeners();
   }
 
+  void updateOnComplete() {
+    _tasks.length - 1;
+  }
+
   void deleteTask(Todos task) {
     _tasks.remove(task);
     notifyListeners();
   }
 
+  void addDate(DateTimeRange datePicked) {
+    //final date = MyDateRange(pickedRangedate: datePicked);
+    _dateTimeRange = datePicked;
+    notifyListeners();
+  }
+
+  Future<void> pickStartDate(
+      BuildContext context, DateTimeRange pickedRangeDate) async {
+    pickedRangeDate = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2019),
+      lastDate: DateTime.now(),
+    );
+    if (pickedRangeDate != null) {
+      _dateTimeRange = pickedRangeDate;
+    }
+    notifyListeners();
+  }
+
+  //  Future<Null> _selectDate(BuildContext context) async {
+  //   final DateTime picked = await showDatePicker(
+  //       context: context,
+  //       initialDate: selectedDate,
+  //       firstDate: DateTime(2015, 8),
+  //       lastDate: DateTime(2101));
+  //   if (picked != null && picked != selectedDate)
+  //     setState(() {
+  //       selectedDate = picked;
+  //     });
+  // }
+
   //End dof tasks
+
+  //Add textfield:
+
+  // void addTextField(TextFormField newTextfield){
+  //   final textField = Textfields(textfield: newTextfield);
+  // }
+
 }
