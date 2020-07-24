@@ -13,21 +13,8 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
   String newTaskTitle;
   String categoryTitle;
   DateTimeRange _startDate;
-  //DateTime endDate;
 
-  // void pickStartDate() async {
-  //   final startDate = await showDatePicker(
-  //     context: context,
-  //     initialDate: DateTime.now(),
-  //     firstDate: DateTime(2019),
-  //     lastDate: DateTime.now(),
-  //   );
-  //   setState(() {
-  //     _startDate = startDate;
-  //   });
-  // }
-
-  // void addTextField() {}
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +42,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
         child: Form(
+          key: _formKey,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -72,6 +60,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                   ),
                 ),
                 TextFormField(
+                  key: ValueKey('taskName'),
                   enableSuggestions: true,
                   autocorrect: true,
                   textCapitalization: TextCapitalization.sentences,
@@ -79,12 +68,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     hintText: 'Enter task name..',
                   ),
                   validator: (value) {
-                    if (value.isEmpty) {
-                      return 'Please enter a task';
+                    if (value.isEmpty || value.length < 2) {
+                      return 'Please enter a task name';
                     }
                     return null;
                   },
-                  onChanged: (value) {
+                  onSaved: (value) {
                     newTaskTitle = value;
                   },
                 ),
@@ -217,6 +206,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                 Padding(
                   padding: const EdgeInsets.only(right: 25.0),
                   child: TextFormField(
+                    key: ValueKey('categoryName'),
                     maxLength: 20,
                     enableSuggestions: true,
                     autocorrect: true,
@@ -224,65 +214,26 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                     decoration: InputDecoration(
                       hintText: 'Eg. personal, work, study, shopping',
                     ),
-                    onChanged: (value) {
+                    validator: (value) {
+                      if (value.isEmpty) {
+                        return 'Please enter a valid category name';
+
+                        // ;
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
                       categoryTitle = value;
                     },
                   ),
                 ),
                 Builder(
                   builder: (BuildContext context) {
-                    return RaisedButton(
-                      child: Text(
-                        'Add Task',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      elevation: 0.0,
-                      color: kPrimaryColor.withOpacity(0.8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      onPressed: () {
-                        final data =
-                            Provider.of<TaskData>(context, listen: false);
-                        data.addTask(newTaskTitle);
-                        data.addCategory(categoryTitle);
-
-                        // if (newTaskTitle.isEmpty && categoryTitle.isEmpty) {
-                        //   final snackBar = SnackBar(
-                        //     content: RichText(
-                        //       text: TextSpan(
-                        //         children: [
-                        //           TextSpan(
-                        //             text:
-                        //                 'Ummm...seems the text enterd can\`nt be',
-                        //             style: TextStyle(
-                        //                 fontSize: size.width * 0.05,
-                        //                 color: Colors.black87,
-                        //                 fontWeight: FontWeight.w600),
-                        //           ),
-                        //           TextSpan(
-                        //             text: 'checked',
-                        //             style: TextStyle(
-                        //               fontSize: size.width * 0.05,
-                        //               color: Colors.black87,
-                        //               fontWeight: FontWeight.w600,
-                        //               decoration: TextDecoration.lineThrough,
-                        //             ),
-                        //           ),
-                        //         ],
-                        //       ),
-                        //     ),
-                        //     backgroundColor: kPrimaryColor.withOpacity(0.8),
-                        //   );
-                        //   Scaffold.of(context).showSnackBar(snackBar);
-                        // }
-
-                        // else {
-                        //   return null;
-                        // }
-                        Navigator.pop(context);
-                      },
-                    );
+                    return AddTaskButton(
+                        formKey: _formKey,
+                        newTaskTitle: newTaskTitle,
+                        categoryTitle: categoryTitle,
+                        size: size);
                   },
                 ),
               ],
@@ -290,6 +241,81 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class AddTaskButton extends StatelessWidget {
+  const AddTaskButton({
+    Key key,
+    @required GlobalKey<FormState> formKey,
+    @required this.newTaskTitle,
+    @required this.categoryTitle,
+    @required this.size,
+  })  : _formKey = formKey,
+        super(key: key);
+
+  final GlobalKey<FormState> _formKey;
+  final String newTaskTitle;
+  final String categoryTitle;
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+      child: Text(
+        'Create Task',
+        style: TextStyle(color: Colors.white),
+      ),
+      elevation: 0.0,
+      color: kPrimaryColor.withOpacity(0.8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      onPressed: () {
+        final data = Provider.of<TaskData>(context, listen: false);
+        FocusScope.of(context).unfocus();
+        final isValid = _formKey.currentState.validate();
+        if (isValid) {
+          _formKey.currentState.save();
+          data.addTask(newTaskTitle);
+          data.addCategory(categoryTitle);
+          Navigator.pop(context);
+        }
+
+        if (newTaskTitle == null && categoryTitle == null) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Ummm...seems the task can\`t be  ',
+                      style: TextStyle(
+                          fontSize: size.width * 0.04,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(
+                      text: 'checked',
+                      style: TextStyle(
+                        fontSize: size.width * 0.05,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.lineThrough,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              backgroundColor: kPrimaryColor,
+              behavior: SnackBarBehavior.floating,
+              duration: Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+      },
     );
   }
 }

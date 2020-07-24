@@ -32,24 +32,16 @@ class CategoryTile extends StatelessWidget {
       leading: IconButton(
           icon: Icon(Icons.star),
           onPressed: () {
-            category.updatefavoriteCategory(categoryData);
+            //category.updatefavoriteCategory(categoryData);
           }),
       title: Text(
         '${categoryData.category},  (${category.taskCount} ${taskNumber(category.taskCount)}) ',
         style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
       ),
-      subtitle: Text(tasks.todo == null ? 'No tasks added yet' : tasks.todo),
+      subtitle: Text(tasks.todo),
       trailing: IconButton(
           icon: Icon(Icons.delete_outline),
           onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => ConfirmationDialog(
-                  title: 'Delete Category',
-                  contentText:
-                      'Are you sure you want to delete this category?'),
-            );
-
             category.deleteCategory(categoryData);
           }),
       onTap: () {

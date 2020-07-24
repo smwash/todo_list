@@ -15,9 +15,19 @@ class TaskData with ChangeNotifier {
   List<Category> _categories = [];
   List<Textfields> _textFields = [];
   DateTimeRange _dateTimeRange;
+  TimeOfDay _timeOfDay;
+  DateTime _dueDate;
+
+  DateTime get dueDate {
+    return _dueDate;
+  }
 
   DateTimeRange get dateRange {
     return _dateTimeRange;
+  }
+
+  TimeOfDay get timeofDay {
+    return _timeOfDay;
   }
 
   UnmodifiableListView<Todos> get tasks {
@@ -88,17 +98,34 @@ class TaskData with ChangeNotifier {
   }
 
   Future<void> pickStartDate(
-      BuildContext context, DateTimeRange pickedRangeDate) async {
+    BuildContext context,
+    DateTimeRange pickedRangeDate,
+  ) async {
     pickedRangeDate = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(2019),
+      firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
     if (pickedRangeDate != null) {
       _dateTimeRange = pickedRangeDate;
+    } else {
+      _dateTimeRange = await showDateRangePicker(
+        context: context,
+        firstDate: DateTime.now(),
+        lastDate: DateTime.now(),
+      );
     }
+
     notifyListeners();
   }
+
+  // final TimeOfDay time = await showTimePicker(
+  //       context: context,
+  //        initialTime: TimeOfDay(hour: TimeOfDay.now().hour + 1, minute: 00),);
+
+  //       if(time != null){
+  //         _dueDate = DateTime(pickedRangeDate.start.year, pickedRangeDate.start.month, pickedRangeDate.start.day, time.hour, time.minute);
+  //       }
 
   //  Future<Null> _selectDate(BuildContext context) async {
   //   final DateTime picked = await showDatePicker(

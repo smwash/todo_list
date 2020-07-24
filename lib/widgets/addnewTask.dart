@@ -14,10 +14,6 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   DateTimeRange _startDate;
   final _formKey = GlobalKey<FormState>();
 
-  // void _trySubmit() {
-
-  // }
-
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
